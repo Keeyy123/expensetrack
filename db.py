@@ -2,13 +2,13 @@ import os
 import psycopg2
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(dotenv_path='/home/key/expensetrack/.env', override=True)
 
 def get_connection():
     return psycopg2.connect(
         host=os.getenv("PG_HOST", "localhost"),
         port=os.getenv("PG_PORT", 5432),
-        dbname=os.getenv("PG_NAME", "postgres"),
+        dbname=os.getenv("PG_NAME", "expensetrack"),
         user=os.getenv("PG_USER", "contactuser"),
         password=os.getenv("PG_PASSWORD", "contactpass123")
     )
@@ -34,4 +34,3 @@ def setup_database():
     conn.commit()
     cur.close()
     conn.close()
-

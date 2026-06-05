@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ExpenseTrack</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <header>
+        <h1>ExpenseTrack</h1>
+        <p>Your personal expense dashboard</p>
+    </header>
+
+    <main>
+
+        <section class="card">
+            <h2>Spending by Category</h2>
+            <canvas id="expenseChart"></canvas>
+        </section>
+
+        <section class="card">
+            <h2>Add Expense</h2>
+            <form action="/add-expense" method="POST">
+                <input type="text" name="description" placeholder="Description" required>
+                <input type="number" name="amount" placeholder="Amount" step="0.01" required>
+                <select name="category_id" required>
+                    <option value="">Select Category</option>
+                    {% for category in categories %}
+                    <option value="{{ category[0] }}">{{ category[1] }}</option>
+                    {% endfor %}
+                </select>
+                <input type="date" name="date">
+                <button type="submit">Add Expense</button>
+            </form>
+        </section>
+
+        <section class="card">
+            <h2>Add Category</h2>
+            <form action="/add-category" method="POST">
+                <input type="text" name="name" placeholder="Category name" required>
+                <button type="submit">Add Category</button>
+            </form>
+        </section>
+
+        <section class="card">
+            <h2>All Expenses</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Description</th>
+                        <th>Amount</th>
+                        <th>Category</th>
+                        <th>Date</th>
+                        <th>Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for expense in expenses %}
+                    <tr>
+                        <td>{{ expense[0] }}</td>
+                        <td>{{ expense[1] }}</td>
+                        <td>${{ "%.2f"|format(expense[2]) }}</td>
+                        <td>{{ expense[3] }}</td>
+                        <td>{{ expense[4] }}</td>
+                        <td>
+                            <form action="/delete-expense/{{ expense[0] }}" method="POST">
+                                <button type="submit">X</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+
+    </main>
+
+    <script>
+        fetch('/api/totals')
+            .then(res => res.json())
+            .then(data => {
+                const labels = data.map(d => d.category);
+                const totals = data.map(d => d.total);
+                new Chart(document.getElementById('expenseChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Total Spent ($)',
+                            data: totals,
+                            backgroundColor: [
+                                '#4f46e5', '#7c3aed', '#2563eb',
+                                '#059669', '#d97706', '#dc2626'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+            });
+    </script>
+
+</body>
+</html>
+
